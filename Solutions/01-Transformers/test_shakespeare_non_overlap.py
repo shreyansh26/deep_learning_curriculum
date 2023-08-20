@@ -34,7 +34,7 @@ class ShakespeareDataset(Dataset):
 train_dataset = ShakespeareDataset(text, block_size)
 print(train_dataset.vocab_size)
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 print("device:", device)
 
 model = DecoderOnlyTransformer(
@@ -45,7 +45,7 @@ model = DecoderOnlyTransformer(
             block_size=train_dataset.block_size
         ).to(device)
 
-model.load_state_dict(torch.load("models/shakespeare_works.pt"))
+model.load_state_dict(torch.load("models/shakespeare_works_non_overalap.pt"))
 
 def top_k_logits(logits, k):
     v, ix = torch.topk(logits, k)
@@ -80,8 +80,32 @@ def sample(model, x, steps, temperature=1.0, sample=False, top_k=None):
 
     return x
 
-context = " Enter Caesar and Brutus "
-x = torch.tensor([train_dataset.word_to_idx[s] for s in re.split(r"\b", context)], dtype=torch.long).unsqueeze(0).to(device)
-y = sample(model, x, 500, temperature=1.0, sample=True, top_k=10)[0]
+context = ''' Julius Caesar was a famous man. '''
+
+inp = torch.tensor([train_dataset.word_to_idx[s] for s in re.split(r"\b", context)], dtype=torch.long).unsqueeze(0).to(device)
+y = sample(model, inp, 300, temperature=1.0, sample=True, top_k=10)[0]
 completion = ''.join([train_dataset.idx_to_word[int(i)] for i in y])
-print(completion)
+print("Completion:", completion)
+
+'''
+Julius Caesar was a famous man. His brother was but
+mad.
+
+SICINIUS.
+In the next king’s crown, sir, were as his great rewards fit the state
+of all the love of Egypt.
+
+BRUTUS.
+Well, we doubt not but by th’ advice, no: all this faults was wont to
+have been heard again in the great men their company, for their faces we have a a a
+fancy, or note which a fancy, as a is will not a a a married a almost
+AMIENS.
+
+GENTLEWOMANmuch wager’S-what the for word a a man is man proves; here must playing comes
+Until a last, or must a throstle man censure must a must must make make will cry be a
+Something? And married with them of Don: would Don an or with almost note almost last would
+them?
+
+MERCHANT.
+No would a rather note would would, sir, were cry, “you heard at heard bold heard
+'''

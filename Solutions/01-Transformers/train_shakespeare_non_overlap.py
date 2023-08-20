@@ -35,14 +35,14 @@ class ShaekspeareDataset(Dataset):
 block_size = 128
 text = open('data/100-0.txt', 'r').read()
 train_dataset = ShaekspeareDataset(text, block_size)
-print(train_dataset[0])
+print(len(train_dataset))
 
 # Create dataset and dataloader
 batch_size = 64
 train_loader = DataLoader(
-    train_dataset, shuffle=True, pin_memory=True, batch_size=batch_size
+    train_dataset, shuffle=True, pin_memory=True, batch_size=batch_size, drop_last=True
 )
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 print("device:", device)
 
 model = DecoderOnlyTransformer(
@@ -50,13 +50,14 @@ model = DecoderOnlyTransformer(
             num_heads=8,
             hidden_size=512,
             vocab_size=train_dataset.vocab_size,
-            block_size=train_dataset.block_size
+            block_size=train_dataset.block_size,
+            dropout_rate=0.1
         ).to(device)
 
 loss_fn = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=5e-4)
+optimizer = optim.Adam(model.parameters(), lr=6e-4)
 
-max_epochs = 5
+max_epochs = 20
 for epoch in range(max_epochs):
     pbar = tqdm(enumerate(train_loader), total=len(train_loader))
     for it, (x, y) in pbar:
@@ -72,4 +73,4 @@ for epoch in range(max_epochs):
         optimizer.step()
         pbar.set_description(f"epoch {epoch} iter {it}: train loss {loss.item():.5f}")
 
-torch.save(model.state_dict(), "models/shakespeare_works.pt")
+torch.save(model.state_dict(), "models/shakespeare_works_non_overalap.pt")
