@@ -99,14 +99,7 @@ class AdamFused:
             fused_adam_kernel[grid](self.params, self.grads, self.n_ele, self.m, self.v, self.lr, self.beta1, self.beta2, self.beta1 ** self.step_count, self.beta2 ** self.step_count, self.eps, self.wd, self.step_count, BLOCK_SIZE=1024)
 
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-assert device == torch.device('cuda')
-
-def check_allclose(tensor1, tensor2):
-    if torch.allclose(tensor1, tensor2, rtol=1e-3, atol=1e-5): # Not an EXACT match so have to lower constraints
-        print("FusedAdam oputput same as Adam!")
-    else:
-        print("Outputs differ...")
+device = torch.device('cuda')
 
 def verify_same_model(model1, model2):
     for p1, p2 in zip(model1.parameters(), model2.parameters()):
