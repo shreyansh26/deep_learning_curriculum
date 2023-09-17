@@ -47,3 +47,6 @@ model_dp_initial_1 = load_model("initial", 1)
 
 print(verify_same_model(model_dp_initial_0, model_dp_initial_1))
 print(verify_same_model(model_dp_initial_0, model_no_dp_initial))
+
+# Final models won't be same for normal and DDP implementations as we do DDP and not DP.
+# Difference - https://discuss.pytorch.org/t/is-data-parallel-or-ddp-equivalent-to-larger-batch/104825/6
