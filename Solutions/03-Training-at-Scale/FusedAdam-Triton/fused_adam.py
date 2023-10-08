@@ -67,7 +67,10 @@ class AdamFused:
         i = 0
         for param in self.parameters:
             num_ele =  param.numel()
+            # Populate self.params list
             self.params[i : i+num_ele] = param.view(-1)
+            # Ensure that original model will be updated 
+            # on updating self.params
             param.data = self.params[i : i+num_ele].view(param.data.shape)
             param.grad = self.grads[i : i+num_ele].view(param.data.shape)
 
